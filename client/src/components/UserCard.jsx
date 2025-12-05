@@ -1,0 +1,191 @@
+import React from "react";
+import { MdEdit, MdDelete } from "react-icons/md";
+
+// Role colors constant
+const ROLE_COLORS = {
+  admin: "#FF6B6B",
+  officer: "#4ECDC4",
+  staff: "#556270",
+  member: "#C7F464",
+  guest: "#A8A8A8",
+};
+
+// Avatar component with fallback
+const Avatar = ({ name, role, profilePicture }) => {
+  const initials = name ? name.charAt(0).toUpperCase() : "?";
+  const bgColor = ROLE_COLORS[role] || "#999";
+
+  return profilePicture ? (
+    <img
+      src={profilePicture}
+      alt={name || "User"}
+      className="avatar"
+      onError={(e) => {
+        e.target.onerror = null;
+        e.target.style.display = "none";
+      }}
+    />
+  ) : (
+    <div className="avatar fallback-avatar" style={{ backgroundColor: bgColor }}>
+      {initials}
+    </div>
+  );
+};
+
+// Main UserCard
+const UserCard = ({ name, email, id, batch, role, profile_picture }) => {
+  return (
+    <>
+      <div className="user-card">
+        <div className="top-row">
+          <Avatar name={name} role={role} profilePicture={profile_picture} />
+          <div className="main-info">
+            <h2 className="name">{name}</h2>
+            <p className="email">{email}</p>
+          </div>
+          <div className="actions">
+            <button className="icon-btn edit" aria-label="Edit user">
+              <MdEdit size={18} />
+            </button>
+            <button className="icon-btn delete" aria-label="Delete user">
+              <MdDelete size={18} />
+            </button>
+          </div>
+        </div>
+
+        <div className="badge-grid">
+          <span className="badge">ID: {id}</span>
+          <span className="badge">Batch: {batch}</span>
+          <span className="badge" style={{ backgroundColor: ROLE_COLORS[role] || "#ccc" }}>
+            {role}
+          </span>
+        </div>
+      </div>
+
+      {/* CSS */}
+      <style>{`
+        .user-card {
+          display: flex;
+          flex-direction: column;
+          gap: 12px;
+          padding: 16px 20px;
+          border-radius: 14px;
+          background: #fff;
+          border: 1px solid #e5e7eb;
+          box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+          transition: all 0.25s ease;
+          width: 100%;
+          max-width: 400px;
+        }
+
+        .user-card:hover {
+          border-color: #3b82f6;
+          box-shadow: 0 6px 14px rgba(0,0,0,0.12);
+          transform: translateY(-2px);
+        }
+
+        .top-row {
+          display: flex;
+          align-items: center;
+          gap: 16px;
+        }
+
+        .avatar, .fallback-avatar {
+          width: 60px;
+          height: 60px;
+          border-radius: 50%;
+          object-fit: cover;
+          border: 1px solid #e5e7eb;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-weight: bold;
+          color: #fff;
+          font-size: 1.2rem;
+        }
+
+        .fallback-avatar {
+          text-transform: uppercase;
+        }
+
+        .main-info {
+          flex: 1;
+          display: flex;
+          flex-direction: column;
+          gap: 4px;
+        }
+
+        .name {
+          margin: 0;
+          font-size: 1.1rem;
+          font-weight: 600;
+          color: #111;
+        }
+
+        .email {
+          margin: 0;
+          font-size: 0.875rem;
+          color: #555;
+        }
+
+        .actions {
+          display: flex;
+          gap: 10px;
+          opacity: 0;
+          pointer-events: none;
+          transition: opacity 0.2s ease;
+        }
+
+        .user-card:hover .actions,
+        .user-card:focus-within .actions {
+          opacity: 1;
+          pointer-events: all;
+        }
+
+        .icon-btn {
+          border: none;
+          background: #f8f9fa;
+          width: 32px;
+          height: 32px;
+          border-radius: 8px;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          cursor: pointer;
+          transition: 0.2s ease;
+          border: 1px solid transparent;
+        }
+
+        .icon-btn:hover {
+          background: #eef2ff;
+          border-color: #3b82f6;
+          transform: scale(1.1);
+        }
+
+        .icon-btn.delete:hover {
+          background: #fee2e2;
+          border-color: #ef4444;
+        }
+
+        .badge-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+          gap: 8px;
+        }
+
+        .badge {
+          display: inline-block;
+          text-align: center;
+          padding: 6px 12px;
+          border-radius: 8px;
+          border: 1px solid #e5e7eb;
+          font-size: 0.75rem;
+          font-weight: 500;
+          background: #f3f4f6;
+        }
+      `}</style>
+    </>
+  );
+};
+
+export default UserCard;
