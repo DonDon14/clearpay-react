@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import axios from 'axios';
-import '../../styles/Admin.css'; // Reusing your admin styles
+import { createMember } from '../../api/members'
+import '../../styles/Admin.css';
 
 const AddMemberModal = ({ isOpen, onClose, onSuccess }) => {
   const [formData, setFormData] = useState({
@@ -18,9 +18,7 @@ const AddMemberModal = ({ isOpen, onClose, onSuccess }) => {
     e.preventDefault();
     try {
       const token = localStorage.getItem('token');
-      await axios.post('http://localhost:5000/members', formData, {
-        headers: { token }
-      });
+      await axios.post(token, formData);
       
       // Success!
       alert('Member Added Successfully!');
@@ -29,7 +27,8 @@ const AddMemberModal = ({ isOpen, onClose, onSuccess }) => {
       onClose();   // Close modal
       
     } catch (err) {
-      setError(err.response?.data?.message || 'Error adding member');
+      const msg = err.response?.data?.message || 'Error adding member';
+      setError(msg);
     }
   };
 

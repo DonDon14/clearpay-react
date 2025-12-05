@@ -1,22 +1,21 @@
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
+import { getCategories, deleteCategory } from '../../api/categories'; // Import API
 import '../../styles/Admin.css';
 import AddContributionModal from '../../components/modals/AddContributionModal';
 
 const AdminContributions = () => {
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [isModalOpen, setIsModalOpen] = useState(false);
   
-  // State for Form (We can keep it simple here or use a Modal later)
-  const [formData, setFormData] = useState({ name: '', amount: '', description: '' });
-  const [isEditing, setIsEditing] = useState(null); // ID of item being edited
+  // Modal State
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState(null); // Data to edit
 
   // 1. FETCH
   const fetchCategories = async () => {
     try {
-      const res = await axios.get('http://localhost:5000/categories');
-      setCategories(res.data);
+      const data = await getCategories(); // Using API file
+      setCategories(data);
       setLoading(false);
     } catch (err) {
       console.error('Error fetching categories');
@@ -27,48 +26,28 @@ const AdminContributions = () => {
     fetchCategories();
   }, []);
 
-  // 2. SUBMIT (Create or Update)
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    try {
-      const token = localStorage.getItem('token');
-      const config = { headers: { token } };
-
-      if (isEditing) {
-        // UPDATE Logic
-        await axios.put(`http://localhost:5000/categories/${isEditing}`, formData, config);
-        alert('Fee Updated!');
-      } else {
-        // CREATE Logic
-        await axios.post('http://localhost:5000/categories', formData, config);
-        alert('Fee Created!');
-      }
-
-      setFormData({ name: '', amount: '', description: '' });
-      setIsEditing(null);
-      fetchCategories();
-
-    } catch (err) {
-      alert('Error saving fee');
-    }
-  };
-
-  // 3. DELETE
+  // 2. DELETE
   const handleDelete = async (id) => {
-    if (!window.confirm('Are you sure?')) return;
+    if (!window.confirm('Are you sure you want to delete this fee?')) return;
     try {
       const token = localStorage.getItem('token');
-      await axios.delete(`http://localhost:5000/categories/${id}`, { headers: { token } });
+      await deleteCategory(token, id); // Using API file
       fetchCategories();
     } catch (err) {
-      alert(err.response?.data?.message || 'Delete Failed');
+      alert('Delete Failed');
     }
   };
 
-  // 4. LOAD EDIT DATA
+  // 3. OPEN MODAL FOR EDIT
   const handleEdit = (cat) => {
-    setFormData({ name: cat.name, amount: cat.amount, description: cat.description });
-    setIsEditing(cat.id);
+    setSelectedCategory(cat); // Pass this data to modal
+    setIsModalOpen(true);     // Open it!
+  };
+
+  // 4. OPEN MODAL FOR CREATE
+  const handleCreate = () => {
+    setSelectedCategory(null); // Clear data for new entry
+    setIsModalOpen(true);
   };
 
   return (
@@ -76,8 +55,9 @@ const AdminContributions = () => {
       <h1>💰 Contributions & Fees</h1>
 
       <div className="admin-controls">
-        <p>Manage the list of fees members can fee for.</p>
-        <button onClick={() => setIsModalOpen(true)} className="btn-add">➕ Add New Contribution
+        <p>Manage the list of fees members can pay for.</p>
+        <button onClick={handleCreate} className="btn-add">
+          ➕ Add New Contribution
         </button>
       </div>
 
@@ -107,11 +87,14 @@ const AdminContributions = () => {
           ))}
         </tbody>
       </table>
-          <AddContributionModal
-            isOpen={isModalOpen}
-            onClose={() => { setIsModalOpen(false); setIsEditing(null); setFormData({ name: '', amount: '', description: '' }); }}
-            onSuccess={() => { fetchCategories(); }}
-          />
+
+      {/* MODAL */}
+      <AddContributionModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onSuccess={fetchCategories}
+        initialData={selectedCategory} // <--- Pass the data here!
+      />
     </div>
   );
 };
