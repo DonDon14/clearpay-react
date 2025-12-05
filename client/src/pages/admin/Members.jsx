@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import AddMemberModal from '../../components/modals/AddMemberModal.jsx';
 import UserCard from '../../components/UserCard.jsx';
-import { getMembers } from '../../api/members.js';
+import { getMembers } from '../../api/members';
 
 const AdminMembers = () => {
   const [members, setMembers] = useState([]);

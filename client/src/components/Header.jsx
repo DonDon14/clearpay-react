@@ -79,7 +79,7 @@ const styles = {
     borderBottom: '1px solid #e2e8f0',
     boxShadow: '0 1px 2px 0 rgb(0 0 0 / 0.05)',
     flexShrink: 0,
-    minWidth: '600px',
+    minWidth: '90%',
   },
   title: {
     margin: 0,

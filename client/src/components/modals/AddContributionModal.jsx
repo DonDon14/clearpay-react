@@ -1,31 +1,45 @@
-import React, { useState } from 'react';
-import axios from 'axios';
-import '../../styles/Admin.css'; // Reuse existing styles
+import React, { useState, useEffect } from 'react';
+import { createCategory, editCategory } from '../../api/categories'; // Import API
+import '../../styles/AddContributionModal.css';
 
-const AddContributionModal = ({ isOpen, onClose, onSuccess }) => {
+// Add 'initialData' prop
+const AddContributionModal = ({ isOpen, onClose, onSuccess, initialData }) => {
   const [formData, setFormData] = useState({ name: '', amount: '', description: '' });
   const [error, setError] = useState('');
 
+  // When modal opens or data changes, set the form
+  useEffect(() => {
+    if (isOpen && initialData) {
+      setFormData(initialData); // Edit Mode
+    } else {
+      setFormData({ name: '', amount: '', description: '' }); // Create Mode (Reset)
+    }
+    setError('');
+  }, [isOpen, initialData]);
+
   if (!isOpen) return null;
 
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
+  const handleChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
       const token = localStorage.getItem('token');
-      await axios.post('http://localhost:5000/categories', formData, {
-        headers: { token }
-      });
       
-      alert('Fee Category Added!');
-      setFormData({ name: '', amount: '', description: '' }); // Reset form
-      onSuccess(); // Refresh the list on parent page
-      onClose();   // Close modal
+      if (initialData) {
+        // UPDATE
+        await editCategory(token, initialData.id, formData);
+        alert('Fee Updated Successfully!');
+      } else {
+        // CREATE
+        await createCategory(token, formData);
+        alert('Fee Created Successfully!');
+      }
+      
+      onSuccess();
+      onClose();
     } catch (err) {
-      setError('Error adding fee category');
+      setError(err.response?.data?.message || 'Error saving fee');
     }
   };
 
@@ -33,43 +47,20 @@ const AddContributionModal = ({ isOpen, onClose, onSuccess }) => {
     <div className="modal-overlay">
       <div className="modal-content">
         <div className="modal-header">
-          <h3>💰 Add New Contribution</h3>
+          <h3>{initialData ? '✏️ Edit Fee' : '💰 Add New Fee'}</h3>
           <button className="modal-close" onClick={onClose}>&times;</button>
         </div>
-
         {error && <p style={{color:'red'}}>{error}</p>}
-
         <form onSubmit={handleSubmit} className="modal-form">
           <label>Fee Name</label>
-          <input 
-            className="search-input" style={{width:'95%'}} 
-            name="name" 
-            placeholder="e.g. Christmas Party" 
-            onChange={handleChange} 
-            required 
-          />
-
+          <input className="search-input" style={{width:'100%'}} name="name" value={formData.name} onChange={handleChange} required />
           <label>Amount</label>
-          <input 
-            className="search-input" style={{width:'95%'}} 
-            type="number" 
-            name="amount" 
-            placeholder="0.00" 
-            onChange={handleChange} 
-            required 
-          />
-
+          <input className="search-input" style={{width:'100%'}} type="number" name="amount" value={formData.amount} onChange={handleChange} required />
           <label>Description</label>
-          <textarea 
-            className="search-input" style={{width:'95%', height:'80px', fontFamily:'Arial'}} 
-            name="description" 
-            placeholder="Optional details..." 
-            onChange={handleChange} 
-          />
-
+          <textarea className="search-input" style={{width:'100%'}} name="description" value={formData.description || ''} onChange={handleChange} />
           <div className="modal-actions">
-            <button type="button" onClick={onClose} style={{padding:'10px', background:'#ccc', border:'none', borderRadius:'5px', cursor:'pointer'}}>Cancel</button>
-            <button type="submit" className="btn-add">Save Fee</button>
+            <button type="button" onClick={onClose} style={{padding:'10px', background:'#ccc', border:'none', borderRadius:'5px'}}>Cancel</button>
+            <button type="submit" className="btn-add">{initialData ? 'Update' : 'Save'}</button>
           </div>
         </form>
       </div>
