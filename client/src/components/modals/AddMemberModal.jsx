@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { createMember } from '../../api/members'
-import '../../styles/Admin.css';
 
 const AddMemberModal = ({ isOpen, onClose, onSuccess }) => {
   const [formData, setFormData] = useState({

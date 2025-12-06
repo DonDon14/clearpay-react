@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { getCategories, deleteCategory } from '../../api/categories'; // Import API
 import '../../styles/Admin.css';
 import AddContributionModal from '../../components/modals/AddContributionModal';
+import { MdEdit, MdDelete } from "react-icons/md";
 
 const AdminContributions = () => {
   const [categories, setCategories] = useState([]);
@@ -80,8 +81,12 @@ const AdminContributions = () => {
               <td>{cat.description || '-'}</td>
               <td>{new Date(cat.created_at).toLocaleDateString()}</td>
               <td>
-                <button onClick={() => handleEdit(cat)} className="action-btn btn-edit">✏️</button>
-                <button onClick={() => handleDelete(cat.id)} className="action-btn btn-delete">🗑️</button>
+                <button onClick={() => handleEdit(cat)} className="action-btn btn-edit">
+                  <MdEdit size={18} />
+                </button>
+                <button onClick={() => handleDelete(cat.id)} className="action-btn btn-delete">
+                  <MdDelete size={18} />
+                </button>
               </td>
             </tr>
           ))}

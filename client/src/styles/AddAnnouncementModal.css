@@ -1,0 +1,43 @@
+.search-input {
+    width: 100%;
+}
+
+.btn-close {
+    padding: 10px;
+    background: #ccc;
+    border: none;
+    border-radius: 5px;
+}
+
+.modal-form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    max-width: 600px;
+}
+
+.modal-tags {
+    display: flex;
+    gap: 10px;
+}
+
+.dropdown-tags {
+    padding: 10px;
+    flex: 1;
+    border-radius: 5px;
+}
+
+.btn-submit {
+    padding: 12px;
+    background: #007bff;
+    color: white;
+    border: none;
+    cursor: pointer;
+    font-weight: bold;
+    border-radius: 5px;
+}
+
+.btn-container {
+    display: flex;
+    justify-content: flex-end;
+}

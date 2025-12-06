@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { createCategory, editCategory } from '../../api/categories'; // Import API
+import { createCategory, editCategory } from '../../api/categories';
 import '../../styles/AddContributionModal.css';
 
 // Add 'initialData' prop
@@ -53,13 +53,13 @@ const AddContributionModal = ({ isOpen, onClose, onSuccess, initialData }) => {
         {error && <p style={{color:'red'}}>{error}</p>}
         <form onSubmit={handleSubmit} className="modal-form">
           <label>Fee Name</label>
-          <input className="search-input" style={{width:'100%'}} name="name" value={formData.name} onChange={handleChange} required />
+          <input className="search-input" name="name" value={formData.name} onChange={handleChange} required />
           <label>Amount</label>
-          <input className="search-input" style={{width:'100%'}} type="number" name="amount" value={formData.amount} onChange={handleChange} required />
+          <input className="search-input" type="number" name="amount" value={formData.amount} onChange={handleChange} required />
           <label>Description</label>
-          <textarea className="search-input" style={{width:'100%'}} name="description" value={formData.description || ''} onChange={handleChange} />
+          <textarea className="search-input" name="description" value={formData.description || ''} onChange={handleChange} />
           <div className="modal-actions">
-            <button type="button" onClick={onClose} style={{padding:'10px', background:'#ccc', border:'none', borderRadius:'5px'}}>Cancel</button>
+            <button type="button" className="btn-close" onClick={onClose}>Cancel</button>
             <button type="submit" className="btn-add">{initialData ? 'Update' : 'Save'}</button>
           </div>
         </form>

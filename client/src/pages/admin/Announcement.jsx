@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
+import { deleteAnnouncement, getAnnouncements } from '../../api/announcements'; 
+import AddAnnouncementModal from '../../components/modals/AddAnnouncementModal';
+
 
 function AdminAnnouncements() {
   // 1. STATE
@@ -8,17 +10,20 @@ function AdminAnnouncements() {
   const [formData, setFormData] = useState({
     title: '',
     text: '',
-    type: 'general',          // Default value
-    priority: 'low',          // Default value
-    target_audience: 'all'    // Default value
+    type: 'general',          
+    priority: 'low',          
+    target_audience: 'all'    
   });
+
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [selectedAnnouncement, setSelectedAnnouncement] = useState(null);
 
   // 2. FETCH EXISTING (The Read Logic)
   const fetchAnnouncements = async () => {
     try {
-      // Note: This route is public based on your code, so no token needed for GET (optional)
-      const res = await axios.get('http://localhost:5000/announcements');
-      setAnnouncements(res.data);
+      const token = localStorage.getItem('token');
+      const data = await getAnnouncements(token);
+      setAnnouncements(data);
     } catch (err) {
       console.error('Error fetching announcements');
     }
@@ -39,9 +44,8 @@ function AdminAnnouncements() {
     e.preventDefault();
     try {
       const token = localStorage.getItem('token');
-      await axios.post('http://localhost:5000/announcements', formData, {
-        headers: { token }
-      });
+      await addAnnouncement(token, formData);
+      alert('Announcement added successfully!')
       
       setMessage('✅ Announcement Posted!');
       setFormData({ title: '', text: '', type: 'general', priority: 'low', target_audience: 'all' }); // Reset form
@@ -52,68 +56,44 @@ function AdminAnnouncements() {
     }
   };
 
+  const handleDelete = async (id) => {
+    if (!window.confirm('Are you sure you want to delete this announcement?')) return;
+    try {
+      const token = localStorage.getItem('token');
+      await deleteAnnouncement(token, id);
+      alert('Announcement deleted successfully!');
+      fetchAnnouncements();
+    } catch (err) {
+      alert('Error deleting announcement');
+    }
+  };
+
+  const handleEdit = (ann) => {
+    setSelectedAnnouncement(ann);
+    setIsAddModalOpen(true);
+  };
+
+  const handleCreate = () => {
+    setSelectedAnnouncement(null);
+    setIsAddModalOpen(true);
+  };
+
+
+
   return (
     <div className="admin-container">
       <h2>📢 Manage Announcements</h2>
       
       {/* LEFT: CREATE FORM */}
-      <div style={{ background: '#fff', padding: '20px', border: '1px solid #ddd', borderRadius: '8px', marginBottom: '40px' }}>
-        <h3>Post New Announcement</h3>
-        {message && <p style={{ fontWeight: 'bold' }}>{message}</p>}
-
-        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '15px', maxWidth: '600px' }}>
-          
-          <input 
-            type="text" 
-            name="title" 
-            placeholder="Title (e.g. No Classes Tomorrow)" 
-            value={formData.title} 
-            onChange={handleChange} 
-            required 
-            style={{ padding: '10px' }}
-          />
-
-          <textarea 
-            name="text" 
-            placeholder="Write the details here..." 
-            rows="4"
-            value={formData.text} 
-            onChange={handleChange} 
-            required 
-            style={{ padding: '10px' }}
-          />
-
-          <div style={{ display: 'flex', gap: '10px' }}>
-            <select name="type" value={formData.type} onChange={handleChange} style={{ padding: '10px', flex: 1 }}>
-              <option value="general">General</option>
-              <option value="event">Event</option>
-              <option value="urgent">Urgent</option>
-              <option value="maintenance">Maintenance</option>
-            </select>
-
-            <select name="priority" value={formData.priority} onChange={handleChange} style={{ padding: '10px', flex: 1 }}>
-              <option value="low">Low Priority</option>
-              <option value="medium">Medium</option>
-              <option value="high">High</option>
-              <option value="critical">Critical</option>
-            </select>
-
-            <select name="target_audience" value={formData.target_audience} onChange={handleChange} style={{ padding: '10px', flex: 1 }}>
-              <option value="all">Everyone</option>
-              <option value="members">Members Only</option>
-              <option value="staff">Staff Only</option>
-            </select>
-          </div>
-
-          <button type="submit" style={{ padding: '12px', background: '#007bff', color: 'white', border: 'none', cursor: 'pointer', fontWeight: 'bold' }}>
-            Post Announcement
-          </button>
-        </form>
-      </div>
+      
 
       {/* RIGHT: PREVIEW LIST */}
       <div>
         <h3>📜 Recent Announcements</h3>
+        <div className='admin-controls'>
+          <p>Manage announcements</p>
+          <button onClick={handleCreate} className="btn-add">➕ Add New Announcement</button>
+        </div>
         {announcements.map(ann => (
           <div key={ann.id} style={{ background: '#f9f9f9', padding: '15px', borderLeft: '5px solid #007bff', marginBottom: '15px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between' }}>
@@ -128,7 +108,12 @@ function AdminAnnouncements() {
           </div>
         ))}
       </div>
-
+        <AddAnnouncementModal
+          isOpen={isAddModalOpen}
+          onClose={() => setIsAddModalOpen(false)}
+          onSuccess={fetchAnnouncements}
+          initialData={selectedAnnouncement} // <--- Pass the data here!
+        />
     </div>
   );
 }
