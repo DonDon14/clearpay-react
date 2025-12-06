@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { deleteAnnouncement, getAnnouncements } from '../../api/announcements'; 
+import { deleteAnnouncement, getAnnouncements, addAnnouncement } from '../../api/announcements'; 
 import AddAnnouncementModal from '../../components/modals/AddAnnouncementModal';
+import AnnouncementCard from '../../components/AnnouncementCard';
 
 
 function AdminAnnouncements() {
@@ -56,25 +57,13 @@ function AdminAnnouncements() {
     }
   };
 
-  const handleDelete = async (id) => {
-    if (!window.confirm('Are you sure you want to delete this announcement?')) return;
-    try {
-      const token = localStorage.getItem('token');
-      await deleteAnnouncement(token, id);
-      alert('Announcement deleted successfully!');
-      fetchAnnouncements();
-    } catch (err) {
-      alert('Error deleting announcement');
-    }
-  };
-
-  const handleEdit = (ann) => {
-    setSelectedAnnouncement(ann);
+  const handleCreate = () => {
+    setSelectedAnnouncement(null);
     setIsAddModalOpen(true);
   };
 
-  const handleCreate = () => {
-    setSelectedAnnouncement(null);
+  const handleEditClick = (announcement) => {
+    setSelectedAnnouncement(announcement);
     setIsAddModalOpen(true);
   };
 
@@ -94,26 +83,45 @@ function AdminAnnouncements() {
           <p>Manage announcements</p>
           <button onClick={handleCreate} className="btn-add">➕ Add New Announcement</button>
         </div>
-        {announcements.map(ann => (
-          <div key={ann.id} style={{ background: '#f9f9f9', padding: '15px', borderLeft: '5px solid #007bff', marginBottom: '15px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-              <h4 style={{ margin: '0 0 10px 0' }}>{ann.title}</h4>
-              <small style={{ color: '#666' }}>{new Date(ann.created_at).toLocaleDateString()}</small>
-            </div>
-            <p style={{ margin: 0 }}>{ann.text}</p>
-            <div style={{ marginTop: '10px', fontSize: '12px' }}>
-              <span style={{ background: '#eee', padding: '2px 6px', marginRight: '5px' }}>{ann.type}</span>
-              <span style={{ background: '#eee', padding: '2px 6px' }}>{ann.priority}</span>
-            </div>
+
+      
+          <div className='announcement-grid'>
+            {announcements.map(ann => (
+              <AnnouncementCard
+                data={ann}
+                key={ann.id}
+                id={ann.id}
+                title={ann.title}
+                text={ann.text}
+                type={ann.type}
+                priority={ann.priority}
+                target_audience={ann.target_audience}
+                onDeleteSuccess={fetchAnnouncements}
+                onEdit={() => handleEditClick(ann)}
+              />
+            ))}
+            <AddAnnouncementModal
+              isOpen={isAddModalOpen}
+              onClose={() => setIsAddModalOpen(false)}
+              onSuccess={fetchAnnouncements}
+              initialData={selectedAnnouncement} // <--- Pass the data here!
+            />
           </div>
-        ))}
       </div>
-        <AddAnnouncementModal
-          isOpen={isAddModalOpen}
-          onClose={() => setIsAddModalOpen(false)}
-          onSuccess={fetchAnnouncements}
-          initialData={selectedAnnouncement} // <--- Pass the data here!
-        />
+        
+        <style>{`
+    
+          .announcement-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 60px;
+            margin-top: 20px;
+            margin-left: 20px;
+          }
+          
+          `}
+
+        </style>
     </div>
   );
 }
